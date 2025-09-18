@@ -38,7 +38,8 @@ async function idToGame(id) {
     const response = await fetch(url, {
         method: 'GET',
         headers: {
-            'x-req-report': 'true'
+            'x-req-report': 'true',
+            'Access-Control-Allow-Origin': '*'
         }
     });
 
