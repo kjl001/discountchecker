@@ -34,7 +34,7 @@ async function getAllSteamGames() {
 }
 
 async function idToGame(id) {
-    const url = `http://store.steampowered.com/api/appdetails?appids=${id}`
+    const url = `https://store.steampowered.com/api/appdetails?appids=${id}`
     const response = await fetch(url, {
         method: 'GET',
         headers: {
