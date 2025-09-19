@@ -1,5 +1,4 @@
 let allGames = [];
-let tempGames = []
 
 async function getJSON() {
     const file = './temp-games.json';
@@ -16,7 +15,12 @@ async function getJSON() {
 
 // Run this once on page load.
 async function getAllSteamGames() {
-    const url = `https://api.steampowered.com/IStoreService/GetAppList/v2`;
+    const url = `https://corsproxy.io/?url=https://api.steampowered.com/ISteamApps/GetAppList/v2`;
+    return await fetch(url).then((response) => response.json()).then((data) => data.applist.apps);
+}
+
+async function idToGame(id) {
+    const url = `https://corsproxy.io/?url=https://store.steampowered.com/api/appdetails?appids=${id}`
     const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -24,28 +28,9 @@ async function getAllSteamGames() {
         }
     });
 
-    if (response.ok) {
-        const data = await response.json();
-        return data.applist.apps;
-    }
-    else {
-        console.error("FAILED TO FETCH STEAM GAME LIST");
-    }
-}
-
-async function idToGame(id) {
-    const url = `https://store.steampowered.com/api/appdetails?appids=${id}`
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'x-req-report': 'true',
-            'Access-Control-Allow-Origin': '*'
-        }
-    });
-
     if(response.ok) {
         const data = await response.json();
-        return data;
+        return data[id].data;
     }
     else {
         console.error("FAILED TO CONVERT STEAM APP ID TO STEAM GAME");
@@ -57,10 +42,8 @@ function getSteamGames(targetGame) {
     const MATCH_THRESHOLD = 0.6;    // Min matching threshold of two names
 
     // Filter through all games and find games that meet threshold
-    // TODO: REPLACE TEMPGAMES WITH ALLGAMES
-
     const gamesFound = [];
-    for(const game of tempGames) {
+    for(const game of allGames) {
         const gameSearch = (game.name).toLowerCase();
         const score = stringSimilarity.compareTwoStrings(targetGame.toLowerCase(), gameSearch);
         if(score >= MATCH_THRESHOLD) {
@@ -72,19 +55,22 @@ function getSteamGames(targetGame) {
         }
     }
 
+    // Sort from highest rating to lowest
     gamesFound.sort((a,b) => {
         return b.rating - a.rating;
     });
-
-    //console.log(gamesFound);
 
     return gamesFound;
 }
 
 async function lookupGames(results) {
-    const allGameInfo = []
+    const allGameInfo = [];
     for(const game of results) {
         const gameInfo = await idToGame(game.appid);
+ 
+        // Skip if game doesn't exist, is not out yet, or is free
+        if(!gameInfo || gameInfo.release_date.coming_soon || gameInfo.is_free) continue;
+
         const importantInfo = {
             "name": gameInfo.name,
             "image": gameInfo.capsule_image,
@@ -93,14 +79,19 @@ async function lookupGames(results) {
             "discount": gameInfo.price_overview.discount_percent
         };
         allGameInfo.push(importantInfo);
+
+        // Limit the number of results
+        if(allGameInfo.length >= 10) break;
     }
+
+    return allGameInfo;
 }
 
 function showResults(results) {
     for(const game of results) {
         const resultItem = document.createElement('li');
         resultItem.classList.add('result-item');
-        const text = document.createTextNode(game.name + " " + game.appid);
+        const text = document.createTextNode(`Name: ${game.name} | Initial: ${game.initial_price} | Final: ${game.final_price} | Discount: ${game.discount}`);
         resultItem.appendChild(text);
         list.appendChild(resultItem);
     }
@@ -124,22 +115,7 @@ window.onload = async () => {
 
 window.onload = async() => {
     // Fetch all game data in Steam store
-    tempGames = await getJSON();
-
-    // Read user search input and show closest matches
-    const searchInput = document.querySelector('.input');
-    let searchResults = [];
-    searchInput.addEventListener('input', (e) => {
-        let value = e.target.value;
-        clearList();
-
-        if(value && value.trim().length > 0) {
-            value = value.trim().toLowerCase();
-
-            searchResults = getSteamGames(value);
-            showResults(searchResults);
-        }
-    });
+    allGames = await getAllSteamGames();
 
     // Clear input and results when clicking clear button
     const clearBtn = document.querySelector('.clear-results');
@@ -149,7 +125,6 @@ window.onload = async() => {
     });
 
     const searchForm = document.querySelector('.form');
-    let searchIds = [];
     searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearList();
@@ -161,8 +136,10 @@ window.onload = async() => {
         if(value && value.trim().length > 0) {
             value = value.trim().toLowerCase();
 
+            const searchResults = getSteamGames(value);
             const gameList = await lookupGames(searchResults);
             console.log(gameList);
+            showResults(gameList);
         }
     });
 };
