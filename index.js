@@ -91,27 +91,15 @@ function showResults(results) {
     for(const game of results) {
         const resultItem = document.createElement('li');
         resultItem.classList.add('result-item');
-        const text = document.createTextNode(`Name: ${game.name} | Initial: ${game.initial_price} | Final: ${game.final_price} | Discount: ${game.discount}`);
-        resultItem.appendChild(text);
+        const span = document.createElement('span');
+        resultItem.appendChild(span);
+        span.textContent = `Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%`;
         list.appendChild(resultItem);
     }
 }
 function clearList() {
     list.innerHTML = "";
 }
-/*
-window.onload = async () => {
-    allGames = await getAllSteamGames();
-
-    const searchInput = document.getElementsByClassName("input");
-    searchInput.addEventListener("input", (e) => {
-        const value = e.target.value;
-
-        if(value && value.trim().length > 0) {
-            value = value.trim().toLowerCase();
-        }
-    });
-};*/
 
 window.onload = async() => {
     // Fetch all game data in Steam store
@@ -128,6 +116,8 @@ window.onload = async() => {
     searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearList();
+        const subBtn = document.querySelector("#submit");
+        subBtn.style="background-color: green;";
 
         const inputField = e.target.elements['search'];
         let value = inputField.value;
@@ -138,6 +128,7 @@ window.onload = async() => {
 
             const searchResults = getSteamGames(value);
             const gameList = await lookupGames(searchResults);
+            subBtn.style="background-color: red;";
             console.log(gameList);
             showResults(gameList);
         }
