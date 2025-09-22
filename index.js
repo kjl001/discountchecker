@@ -1,5 +1,6 @@
-let allGames = [];
+let allGames = [];  // Store all available steam store games
 
+// Grab temporary JSON list
 async function getJSON() {
     const file = './temp-games.json';
     const response = await fetch(file);
@@ -14,11 +15,13 @@ async function getJSON() {
 }
 
 // Run this once on page load.
+// Get all available steam store games
 async function getAllSteamGames() {
     const url = `https://corsproxy.io/?url=https://api.steampowered.com/ISteamApps/GetAppList/v2`;
     return await fetch(url).then((response) => response.json()).then((data) => data.applist.apps);
 }
 
+// Convert steam app id to listed steam game
 async function idToGame(id) {
     const url = `https://corsproxy.io/?url=https://store.steampowered.com/api/appdetails?appids=${id}`
     const response = await fetch(url, {
@@ -63,20 +66,23 @@ function getSteamGames(targetGame) {
     return gamesFound;
 }
 
+// Look up given list of games on API and collect info
 async function lookupGames(results) {
     const allGameInfo = [];
     for(const game of results) {
         const gameInfo = await idToGame(game.appid);
+        //console.log(gameInfo);
  
         // Skip if game doesn't exist, is not out yet, or is free
-        if(!gameInfo || gameInfo.release_date.coming_soon || gameInfo.is_free) continue;
+        if(!gameInfo || gameInfo.release_date.coming_soon || gameInfo.is_free || !gameInfo.price_overview) continue;
 
         const importantInfo = {
             "name": gameInfo.name,
             "image": gameInfo.capsule_image,
             "initial_price": gameInfo.price_overview.initial / 100.00,
             "final_price": gameInfo.price_overview.final / 100.00,
-            "discount": gameInfo.price_overview.discount_percent
+            "discount": gameInfo.price_overview.discount_percent,
+            "id": game.appid
         };
         allGameInfo.push(importantInfo);
 
@@ -87,26 +93,61 @@ async function lookupGames(results) {
     return allGameInfo;
 }
 
+// Add search results as list under search bar
 function showResults(results) {
+    // Loop through all game results and add to screen
     for(const game of results) {
-        const resultItem = document.createElement('li');
-        resultItem.classList.add('result-item');
-        const span = document.createElement('span');
-        resultItem.appendChild(span);
-        span.textContent = `Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%`;
-        list.appendChild(resultItem);
+        // Template for list item
+        const gameInfoTemplate = `
+        <li class="result-item">
+            <label class="check-container">
+                <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
+                <input type="checkbox" id="${game.id}"/>
+                <span class="checkmark"></span>
+            </label>
+        </li>
+        `;
+        list.insertAdjacentHTML('beforeend', gameInfoTemplate);
+
+        // When box is checked, add to local storage.
+        list.lastElementChild.addEventListener('change', (e) => {
+            let savedGames = localStorage.getItem("savedGames");
+            const checkInput = e.target;
+            // Add item to local storage
+            if(checkInput.checked) {
+                if(savedGames) {
+                    savedGames = JSON.parse(savedGames);
+                    savedGames.push(checkInput.id);
+                } else {
+                    savedGames = [checkInput.id];
+                }
+                localStorage.setItem("savedGames", JSON.stringify(savedGames));
+            }
+            // Remove item from local storage
+            else {
+                savedGames = JSON.parse(savedGames);
+                savedGames = savedGames.filter(item => item !== checkInput.id);
+                localStorage.setItem("savedGames", JSON.stringify(savedGames));
+            }
+        });
     }
 }
+// Clear search list
 function clearList() {
     list.innerHTML = "";
 }
 
 window.onload = async() => {
     // Fetch all game data in Steam store
-    allGames = await getAllSteamGames();
+    //allGames = await getJSON();
+    const start = document.getElementById("start");
+    start.addEventListener('click', async () => {
+        allGames = await getAllSteamGames();
+    });
 
     // Clear input and results when clicking clear button
     const clearBtn = document.querySelector('.clear-results');
+    const searchInput = document.querySelector('input');
     clearBtn.addEventListener('click', () => {
         searchInput.value = "";
         clearList();
@@ -114,22 +155,31 @@ window.onload = async() => {
 
     const searchForm = document.querySelector('.form');
     searchForm.addEventListener('submit', async (e) => {
+        // Prevent page from reloading and clear previous list
         e.preventDefault();
         clearList();
+
+        // Start of loading
         const subBtn = document.querySelector("#submit");
         subBtn.style="background-color: green;";
 
+        // Record search value and clear bar
         const inputField = e.target.elements['search'];
         let value = inputField.value;
         inputField.value = "";
 
+        // Check for input value and search game
         if(value && value.trim().length > 0) {
             value = value.trim().toLowerCase();
 
+            // Look up game matching search
             const searchResults = getSteamGames(value);
             const gameList = await lookupGames(searchResults);
+
+            // End of loading
             subBtn.style="background-color: red;";
-            console.log(gameList);
+
+            // List results under search bar
             showResults(gameList);
         }
     });

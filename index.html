@@ -22,10 +22,26 @@
                     <input id="search" type="text" class="input" placeholder="Game Name"/>
                     <button id="submit" class="submit-results" type="submit">SUBMIT</button>
                     <button id="clear" class="clear-results" type="button">CLEAR</button>
+                    <button id="start" class="start-results" type="button">START</button>
                 </form>
             </div>
             <div class="results-container">
                 <ul class="results-list" id="list">
+                    <li class="result-item">
+                        <label class="check-container">
+                            <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
+                            <input type="checkbox" class="checkbox"/>
+                            <span class="checkmark"></span>
+                        </label>
+                    </li>
+                    <li class="result-item">
+                        <input type="checkbox"/>
+                        <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
+                    </li>
+                    <li class="result-item">
+                        <input type="checkbox"/>
+                        <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
+                    </li>
                 </ul>
             </div>
         </main>
