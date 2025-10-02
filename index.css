@@ -159,7 +159,6 @@ li.result-item:not(:last-child) {
   align-content: space-around;
   justify-content: center;
   margin-top: 10px;
-  margin-left: -20rem;
 }
 .loader-svg{
   position: absolute;
