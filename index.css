@@ -5,10 +5,71 @@ body {
     flex-direction: column;
 }
 
+/* Search Bar */
 .form-container {
     margin-bottom: 50px;
+    position: relative;
+    border: 1px solid #171a21;
+    border-radius: 6px;
+    width: fit-content;
+    margin: auto;
+    font-size: 0;
+    padding: 0.4rem;
+    background-color: 	#4a6d98;
 }
 
+#search, #submit, #clear, #start {
+    background-color: 	#4a6d98;
+    border: 0;
+    color: #171a21;
+    font-size: 1rem;
+    vertical-align: middle;
+}
+
+#search:focus {
+    outline: none;
+}
+
+#search::placeholder {
+    color: #2b313e;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+#separator {
+    background-color: #171a21;
+    display: inline-block;
+    height: 1.5rem;
+    width: 1px;
+    vertical-align: middle;
+}
+
+/* Replace buttons with images */
+#clear {
+    background-image: url(images/search-clear.svg);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    height: 1.5rem;
+    width: 1.5rem;
+    border: none;
+    background-size: cover;
+    margin-right: 10px;
+}
+
+#submit {
+    background-image: url(images/search-submit.svg);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    height: 1.5rem;
+    width: 1.5rem;
+    border: none;
+    background-size: cover;
+    margin-left: 10px;
+}
+
+/* Result list */
 ul {
     list-style-type: none;
     padding-lefT: 0px;
@@ -53,18 +114,18 @@ li.result-item:not(:last-child) {
     background-color: #c7d5e0;
 }
 
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
 .check-container:hover input ~ .checkmark {
     background-color: #4a6d98;
 }
 
 .check-container input:checked ~ .checkmark {
     background-color: #4a6d98;
-}
-
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
 }
 
 .check-container input:checked ~ .checkmark:after {
@@ -79,4 +140,47 @@ li.result-item:not(:last-child) {
     border: solid #c7d5e0;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
+}
+
+/* Loading icon css: https://jamesinkala.com/blog/create-loading-animations-with-svg-and-css/ */
+.svg-loader{
+  display:none;
+  position: relative;
+  align-content: space-around;
+  justify-content: center;
+  margin-top: 10px;
+  margin-left: -20rem;
+}
+.loader-svg{
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  fill: none;
+  stroke-width: 5px;
+  stroke-linecap: round;
+  stroke: #4dc1d4;
+}
+.loader-svg.bg{
+  stroke-width: 8px;
+  stroke: rgba(27, 40, 56, 0.8);
+}
+
+/* Animation */
+.animate{
+  stroke-dasharray: 242.6;
+  animation: fill-animation 1s cubic-bezier(1,1,1,1) 0s infinite;
+}
+
+@keyframes fill-animation{
+  0%{
+    stroke-dasharray: 40 242.6;
+    stroke-dashoffset: 0;
+  }
+  50%{
+    stroke-dasharray: 141.3;
+    stroke-dashoffset: 141.3;
+  }
+  100%{
+    stroke-dasharray: 40 242.6;
+    stroke-dashoffset: 282.6;
+  }
 }

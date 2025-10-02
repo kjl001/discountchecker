@@ -85,9 +85,6 @@ async function lookupGames(results) {
             "id": game.appid
         };
         allGameInfo.push(importantInfo);
-
-        // Limit the number of results
-        if(allGameInfo.length >= 10) break;
     }
 
     return allGameInfo;
@@ -97,12 +94,21 @@ async function lookupGames(results) {
 function showResults(results) {
     // Loop through all game results and add to screen
     for(const game of results) {
+        const savedGames = localStorage.getItem("savedGames");
+        let checkedStatus = "";
+        if(savedGames) {
+            const savedGamesInfo = JSON.parse(savedGames);
+            if(savedGamesInfo.includes(game.id.toString())) {
+                checkedStatus = "checked";
+            }
+        }
+
         // Template for list item
         const gameInfoTemplate = `
         <li class="result-item">
             <label class="check-container">
                 <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
-                <input type="checkbox" id="${game.id}"/>
+                <input type="checkbox" id="${game.id}" ${checkedStatus}/>
                 <span class="checkmark"></span>
             </label>
         </li>
@@ -132,9 +138,33 @@ function showResults(results) {
         });
     }
 }
+
 // Clear search list
 function clearList() {
     list.innerHTML = "";
+}
+
+// Load all saved games to show up
+async function loadSaves() {
+    if(localStorage.getItem("savedGames")) {
+        const savedGames = JSON.parse(localStorage.savedGames);
+        const fetchedGames = [];
+        for(const id of savedGames) {
+            const gameInfo = await idToGame(id);
+
+            const importantInfo = {
+                "name": gameInfo.name,
+                "image": gameInfo.capsule_image,
+                "initial_price": gameInfo.price_overview.initial / 100.00,
+                "final_price": gameInfo.price_overview.final / 100.00,
+                "discount": gameInfo.price_overview.discount_percent,
+                "id": id
+            };
+            fetchedGames.push(importantInfo);
+        }
+
+        showResults(fetchedGames);
+    }
 }
 
 window.onload = async() => {
@@ -144,6 +174,8 @@ window.onload = async() => {
     start.addEventListener('click', async () => {
         allGames = await getAllSteamGames();
     });
+
+    await loadSaves();
 
     // Clear input and results when clicking clear button
     const clearBtn = document.querySelector('.clear-results');
@@ -161,7 +193,8 @@ window.onload = async() => {
 
         // Start of loading
         const subBtn = document.querySelector("#submit");
-        subBtn.style="background-color: green;";
+        const loading = document.querySelector(".svg-loader");
+        loading.style.display = "flex";
 
         // Record search value and clear bar
         const inputField = e.target.elements['search'];
@@ -177,7 +210,7 @@ window.onload = async() => {
             const gameList = await lookupGames(searchResults);
 
             // End of loading
-            subBtn.style="background-color: red;";
+            loading.style.display = "none";
 
             // List results under search bar
             showResults(gameList);
