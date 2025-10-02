@@ -3,6 +3,7 @@ body {
     color: #c7d5e0;
     display: flex;
     flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Search Bar */
@@ -80,6 +81,7 @@ ul {
     padding: 30px;
     text-wrap: nowrap;
     border-radius: 6px;
+    width: fit-content;
 }
 
 li.result-item:not(:last-child) { 
@@ -87,13 +89,14 @@ li.result-item:not(:last-child) {
 }
 
 .check-container {
-    display:block;
+    display:flex;
     position: relative;
     padding-left: 35px;
     margin-bottom: 12px;
     cursor: pointer;
     font-size: 22px;
     user-select: none;
+    align-items: center;
 }
 
 .check-container input {
@@ -107,7 +110,6 @@ li.result-item:not(:last-child) {
 
 .checkmark {
     position: absolute;
-    top: 0;
     left: 0;
     height: 25px;
     width: 25px;
@@ -140,6 +142,14 @@ li.result-item:not(:last-child) {
     border: solid #c7d5e0;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
+}
+
+.game-image {
+    margin-right: 30px;
+}
+
+.game-desc {
+    font-weight: bold;
 }
 
 /* Loading icon css: https://jamesinkala.com/blog/create-loading-animations-with-svg-and-css/ */

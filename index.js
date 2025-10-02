@@ -107,7 +107,8 @@ function showResults(results) {
         const gameInfoTemplate = `
         <li class="result-item">
             <label class="check-container">
-                <span>Name: ${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
+                <img class="game-image" src="${game.image}" alt="${game.name}"/>
+                <span class="game-desc">${game.name} | Initial: ${game.initial_price} USD | Final: ${game.final_price} USD | Discount: ${game.discount}%</span>
                 <input type="checkbox" id="${game.id}" ${checkedStatus}/>
                 <span class="checkmark"></span>
             </label>
