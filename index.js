@@ -1,19 +1,5 @@
 let allGames = [];  // Store all available steam store games
 
-// Grab temporary JSON list
-async function getJSON() {
-    const file = './temp-games.json';
-    const response = await fetch(file);
-
-    if(response.ok) {
-        const data = await response.json();
-        return data.applist.apps;
-    }
-    else {
-        console.error("ERROR FETCHING JSON: ", error);
-    }
-}
-
 // Run this once on page load.
 // Get all available steam store games
 async function getAllSteamGames() {
@@ -170,12 +156,13 @@ async function loadSaves() {
 
 window.onload = async() => {
     // Fetch all game data in Steam store
-    //allGames = await getJSON();
+    allGames = await getAllSteamGames();
+    /*
     const start = document.getElementById("start");
     start.addEventListener('click', async () => {
         allGames = await getAllSteamGames();
     });
-
+    */
     await loadSaves();
 
     // Clear input and results when clicking clear button
