@@ -139,6 +139,8 @@ async function loadSaves() {
         for(const id of savedGames) {
             const gameInfo = await idToGame(id);
 
+            if(!gameInfo) continue;
+
             const importantInfo = {
                 "name": gameInfo.name,
                 "image": gameInfo.capsule_image,
@@ -168,9 +170,10 @@ window.onload = async() => {
     // Clear input and results when clicking clear button
     const clearBtn = document.querySelector('.clear-results');
     const searchInput = document.querySelector('input');
-    clearBtn.addEventListener('click', () => {
+    clearBtn.addEventListener('click', async () => {
         searchInput.value = "";
         clearList();
+        await loadSaves();
     });
 
     const searchForm = document.querySelector('.form');
